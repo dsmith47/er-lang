@@ -12,5 +12,5 @@ if __name__ == '__main__':
         exit(1)
 
     subprocess.call(['erlc', prog_name + '.erl'])
-    subprocess.call(['erl', '-noshell', '-s', prog_name, function_name, '-s', 'init', 'stop'])
+    subprocess.call(['erl', '-noshell', '-s', prog_name, function_name])
 
