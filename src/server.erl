@@ -21,15 +21,16 @@ handle(Conn) ->
     io:fwrite(UserAgent),
     case get_req_type(Packet) of
       "GET" -> gen_tcp:send(Conn,
-                            response(get_canvas_response()));
-      "POST" -> gen_tcp:send(Conn, response(post_pixel_response()))
+                            response(get_canvas_response(Packet)));
+      "POST" -> gen_tcp:send(Conn,
+			     response(post_pixel_response(Packet)))
     end,
     gen_tcp:send(Conn, response("Hello World")),
     gen_tcp:close(Conn).
 
-get_canvas_response() -> "GET".
+get_canvas_response() -> "GET\n".
 
-post_pixel_response() -> "POST".
+post_pixel_response(Req) -> "POST:\n".
 
 get_user_agent(String) -> 
     UserAgent = string:find(String, "User-Agent"),
