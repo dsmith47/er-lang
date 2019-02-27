@@ -14,8 +14,16 @@ loop(Sock) ->
     loop(Sock).
 
 handle(Conn) ->
+    {ok, Packet} = gen_tcp:recv(Conn, 0),
+    UserAgent = get_user_agent(Packet),
+    io:fwrite(UserAgent),
     gen_tcp:send(Conn, response("Hello World")),
     gen_tcp:close(Conn).
+
+
+get_user_agent(String) -> 
+    UserAgent = string:find(String, "User-Agent"),
+    lists:nth(1, string:split(UserAgent, "\r\n")).
 
 response(Str) ->
     B = iolist_to_binary(Str),
