@@ -1,5 +1,6 @@
 -module(server).
 -import(array_2d, [new/3, get/3, set/4]).
+-import(hits, [new/0, update/2, get/2, cleanup/1]).
 -export([start/0]).
 
 
@@ -8,25 +9,32 @@ start() -> start(8081, 20).
 
 start(Port, Size) ->
     Canvas = array_2d:new(Size, Size, 0),
+    HitTable = hits:new(),
     spawn(fun () -> {ok, Sock} = gen_tcp:listen(Port, [{active, false}]), 
-		    loop(Sock, Canvas) end).
+		    loop(Sock, Canvas, HitTable) end).
 
 
-loop(Sock, Canvas) ->
+loop(Sock, Canvas, HitTable) ->
     {ok, Conn} = gen_tcp:accept(Sock),
-    Handler = spawn(fun () -> handle(Conn, Canvas) end),
+    Handler = spawn(fun () -> handle(Conn, Canvas, HitTable) end),
     gen_tcp:controlling_process(Conn, Handler),
-    loop(Sock, Canvas).
+    loop(Sock, Canvas, HitTable).
 
 
-handle(Conn, Canvas) ->
+handle(Conn, Canvas, HitTable) ->
     {ok, Packet} = gen_tcp:recv(Conn, 0),
     UserAgent = get_user_agent(Packet),
     case get_req_type(Packet) of
+      %"POST"  hits:is_ready(UserAgent, HitTable) -> 
+      "POST" -> 
+		case hits:is_ready(UserAgent, HitTable) of
+		    true ->
+			gen_tcp:send(Conn,
+				     response(post_pixel_response(Canvas, Packet))),
+    		    	hits:update(UserAgent,HitTable)
+		end;
       "GET"  -> gen_tcp:send(Conn,
-                             response(get_canvas_response(Canvas)));
-      "POST" -> gen_tcp:send(Conn,
-                             response(post_pixel_response(Canvas, Packet)))
+                             response(get_canvas_response(Canvas)))
     end,
     gen_tcp:send(Conn, response("Hello World")),
     gen_tcp:close(Conn).
@@ -50,7 +58,6 @@ post_pixel_response(Canvas, Packet) ->
 get_user_agent(String) -> 
     UserAgent = string:find(String, "User-Agent"),
     lists:nth(1, string:split(UserAgent, "\r\n")).
-
 
 get_req_type(String) ->
     lists:nth(1, string:split(lists:nth(1, string:split(String, "\r\n")), " ")).
