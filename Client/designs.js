@@ -9,13 +9,18 @@ function makeGrid(height, width){
         }
     }
 
-    $("td").click(function cellColor() {
+    /*"td").click(function cellColor() {
         color = $("#colorPicker").val();
         if ($(this).attr("style")) {
             $(this).removeAttr("style")
         } else {
             $(this).attr("style", "background-color: " + color);
         }
+    });*/
+    $("#pixelCanvas").on("click", "td", function() {
+
+        $(this).css("background-color", $("#colorPicker").val());
+
     });
 }
 
