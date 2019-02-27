@@ -1,9 +1,9 @@
 -module(array_2d).
--export([new/2, get/3, set/4]).
+-export([new/3, get/3, set/4]).
 
-new(Rows, Cols)->
+new(Rows, Cols, Init) ->
     A = array:new(Rows),
-    array:map(fun(_X, _T) -> array:new(Cols) end, A).
+    array:map(fun(_X, _T) -> array:new([{size, Cols}, {default, Init}]) end, A).
 
 get(RowI, ColI, A) ->
     Row = array:get(RowI, A),
