@@ -2,14 +2,14 @@
 -export([new/3, get/3, set/4]).
 
 new(Rows, Cols, Init) ->
-    A = array:new(Rows),
-    array:map(fun(_X, _T) -> array:new([{size, Cols}, {default, Init}]) end, A).
+    array:new( [{size, Rows}, {default, array:new([{size, Cols}, {default, Init}])}] ).
 
-get(RowI, ColI, A) ->
-    Row = array:get(RowI, A),
-    array:get(ColI, Row).
 
-set(RowI, ColI, Ele, A) ->
-    Row = array:get(RowI, A),
-    Row2 = array:set(ColI, Ele, Row),
-    array:set(RowI, Row2, A).
+get(Row, Col, Array) ->
+    array:get(Col, array:get(Row, Array)).
+
+
+set(Row, Col, Value, Array) ->
+    R = array:get(Row, Array),
+    Edit_R = array:set(Col, Value, R),
+    array:set(Row, Edit_R, Array).
