@@ -1,4 +1,5 @@
 -module(server).
+-import(array_2d, [new/2, get/3, set/4]).
 -export([start/0]).
 
 start() -> start(8080).
