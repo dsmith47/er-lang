@@ -1,0 +1,64 @@
+/* Style Sheeet */
+
+body {
+    text-align: center;
+    background-color: #FFFFFF;
+    padding: 0px;
+}
+
+h1 {
+    font-family: 'Permanent Marker', cursive;
+    font-size: 45px;
+    margin: 0;
+    padding: 0;
+}
+
+h2 {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 20px;
+    margin: 0;
+    padding:0;
+    display: inline;
+}
+
+h3.color {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 18px;
+    margin-top: 20;
+    margin-bottom: 0;
+
+}
+
+h3.canvas {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 18px;
+    margin-top: 20;
+    margin-bottom: 0;
+}
+
+div h4 {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+    display: inline;
+}
+
+table,
+tr,
+td {
+    border: 1px solid black;
+}
+
+table {
+    border-collapse: collapse;
+    margin: 0 auto;
+}
+
+tr {
+    height: 15px;
+}
+
+td {
+    width: 15px;
+}
