@@ -10,7 +10,7 @@ update(UserAgent,Dict) ->
 is_ready(UserAgent, Dict) ->
 	case dict:is_key(UserAgent, Dict) of
 		true ->
-			os:system_time() - dict:fetch(UserAgent, Dict) > 5000000000;
+			os:system_time() - dict:fetch(UserAgent, Dict) > 50;
 		false ->
 			true
 	end.
@@ -19,7 +19,7 @@ check(Keys,Dict) ->
 	Key = lists:nth(0,Keys),
 	Keys2 = lists:delete(Key, Keys),
 	
-	case (os:system_time() - dict:fetch(Key)) > 5000000000 of 
+	case is_ready(Key, Dict) of 
 		true ->
 			Dict2 = dict:erase(Key,Dict);
 		false ->
