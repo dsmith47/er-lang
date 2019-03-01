@@ -38,7 +38,6 @@ loop(Sock, Canvas, HitTable) ->
             gen_tcp:controlling_process(Conn, Handler),
     
             {Canvas2, HitTable2} = flush_buffer(Canvas, HitTable),
-	    gen_tcp:send(Conn, response("ok")), 
 	    loop(Sock, Canvas2, HitTable2)
     end.
 
