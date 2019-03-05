@@ -53,9 +53,15 @@ handle(Parent, Conn, Canvas, HitTable) ->
 		case hits:is_ready(UserAgent, HitTable) of
 		    true ->
 			Parent ! {post, Packet},
-			Parent ! {hit, UserAgent};
-		    false -> io:fwrite("Patience, grasshopper. Your time will come again soon.\n")
-		end;
+			Parent ! {hit, UserAgent},
+		        gen_tcp:send(Conn, response("updated", Packet));
+		    false -> io:fwrite("Patience, grasshopper. Your time will come again soon.\n"),
+			     gen_tcp:send(Conn,
+                                          response("Patience, young " ++
+                                                   "grasshopper. Your time will " ++
+						   "come again soon.",
+						   Packet))
+                    end;
       "GET"  -> gen_tcp:send(Conn,
 			     response(get_canvas_response(Canvas),
                                                           Packet))
