@@ -45,8 +45,10 @@ handle(Parent, Conn, Canvas, HitTable) ->
     %test(Canvas),
     {ok, Packet} = gen_tcp:recv(Conn, 0),
     UserAgent = get_user_agent(Packet),
-
+    io:fwrite(Packet, []),
     case get_req_type(Packet) of
+      "OPTION" -> gen_tcp:send(Conn,
+                               generate_option_response(Packet));
       "POST" -> 
 		case hits:is_ready(UserAgent, HitTable) of
 		    true ->
@@ -55,7 +57,8 @@ handle(Parent, Conn, Canvas, HitTable) ->
 		    false -> io:fwrite("Patience, grasshopper. Your time will come again soon.\n")
 		end;
       "GET"  -> gen_tcp:send(Conn,
-			     response(get_canvas_response(Canvas)))
+			     response(get_canvas_response(Canvas),
+                                                          Packet))
                 end,
     %gen_tcp:send(Conn, response("Hello World")),
     gen_tcp:close(Conn).
@@ -77,13 +80,28 @@ get_user_agent(String) ->
     UserAgent = string:find(String, "User-Agent"),
     lists:nth(1, string:split(UserAgent, "\r\n")).
 
+extract_packet_field(Packet, Key) -> 
+    Field = string:find(Packet, Key),
+    lists:nth(2, string:split(
+                   lists:nth(1, string:split(Field, "\r\n")), ": ")).
+
 get_req_type(String) ->
     lists:nth(1, string:split(lists:nth(1, string:split(String, "\r\n")), " ")).
 
 
-response(Str) ->
+generate_option_response(Str) ->
+  iolist_to_binary(
+    io_lib:fwrite("HTTP/1.0 200 OK\n\n", [])).
+
+response(Str, Request) ->
     B = iolist_to_binary(Str),
     iolist_to_binary(
       io_lib:fwrite(
-         "HTTP/1.0 200 OK\nContent-Type: text/html\nContent-Length: ~p\n\n~s",
+         "HTTP/1.0 200 OK\n" ++
+         "Content-Type: text/html\n" ++
+	 "Access-Control-Allow-Origin: " ++
+	   extract_packet_field(Request, "Origin") ++ "\n" ++
+	 "Access-Control-Allow-Methods: GET, POST\n" ++
+	 "Access-Control-Allow-Headers: Content-Type, Content-Length\n" ++
+         "Content-Length: ~p\n\n~s",
          [size(B), B])).

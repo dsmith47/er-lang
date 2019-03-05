@@ -35,6 +35,7 @@ function makeGrid(height, width, cell_values){
 
 // TODO: This should either not be hardcoded or be more configurable.
 hostname = "http://localhost:8081/";
+//hostname = "http://34.73.178.251/";
 // TODO: move these somewhere more logical.
 GET_GRID_ENDPOINT = "";
 // Global state: object nature makes it pass-by-ref.
