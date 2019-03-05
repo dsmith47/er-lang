@@ -1,20 +1,13 @@
 # er-place
 
-### Running server example.
+### Running server
 
+The server has no configurations, so it should run on
+`localhost:8081` with a simple `make` in the repository root.
 
-1. Compile in `erlc`
-```
-erlc server.erl
-```
+### Testing the client
 
+The client a static html file, which can be accessed in most
+browsers by using `file:///`.
 
-2. Run with `erl`
-```
-erl -noshell -s server start
-```
-
-
-3. Ping `localhost:8080/`
-
-If you need another server, check here.
+## You will need to enable CORS on your browser to test locally

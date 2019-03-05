@@ -1,5 +1,5 @@
 -module(server).
--import(array_2d, [new/3, get/3, set/4]).
+-import(array_2d, [new/3, get/3, set/4, array_to_csv/1]).
 -import(hits, [new/0, update/2, get/2, cleanup/1]).
 -export([start/0]).
 
@@ -38,7 +38,6 @@ loop(Sock, Canvas, HitTable) ->
             gen_tcp:controlling_process(Conn, Handler),
     
             {Canvas2, HitTable2} = flush_buffer(Canvas, HitTable),
-	    gen_tcp:send(Conn, response("ok")), 
 	    loop(Sock, Canvas2, HitTable2)
     end.
 
@@ -57,12 +56,11 @@ handle(Parent, Conn, Canvas, HitTable) ->
 		end;
       "GET"  -> gen_tcp:send(Conn,
 			     response(get_canvas_response(Canvas)))
-    end,
-    
+                end,
     %gen_tcp:send(Conn, response("Hello World")),
     gen_tcp:close(Conn).
 
-get_canvas_response(Canvas) -> "GET".
+get_canvas_response(Canvas) -> array_to_csv(Canvas).
 
 get_post_info(Data) ->
     Result = string:trim(string:find(Data, "\r\n\r\n")),
