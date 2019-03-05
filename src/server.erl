@@ -4,7 +4,7 @@
 -export([start/0]).
 
 
-start() -> start(8081, 20).
+start() -> start(80, 20).
 
 %test(Canvas) ->
 %    io:fwrite("\n"),
