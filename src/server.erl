@@ -19,12 +19,10 @@ flush_buffer(Canvas, HitTable) ->
 start(Port, Size) ->
     Canvas = array_2d:new(Size, Size, 0),
     HitTable = hits:new(),
-    io:fwrite("~p\n", [HitTable]),
     spawn(fun () -> {ok, Sock} = gen_tcp:listen(Port, [{active, false}]), 
 		    loop(Sock, Canvas, HitTable) end).
 
 loop(Sock, Canvas, HitTable) ->
-    io:fwrite("~p\n", [HitTable]),
     case gen_tcp:accept(Sock, 500) of
         {error, timeout} -> 
             {Canvas2, HitTable2} = flush_buffer(Canvas, HitTable),
@@ -42,7 +40,6 @@ loop(Sock, Canvas, HitTable) ->
 handle(Parent, Conn, Canvas, HitTable) ->
     {ok, Packet} = gen_tcp:recv(Conn, 0),
     UserAgent = get_user_agent(Packet),
-    io:fwrite(Packet, []),
     case get_req_type(Packet) of
       "OPTION" -> gen_tcp:send(Conn,
                                generate_option_response(Packet));
