@@ -6,10 +6,6 @@
 
 start() -> start(8081, 20).
 
-%test(Canvas) ->
-%    io:fwrite("\n"),
-%    io:fwrite(integer_to_list(array_2d:get(1,5,Canvas))).
-
 flush_buffer(Canvas, HitTable) ->
     receive
 	{post, Packet} -> 
@@ -42,7 +38,6 @@ loop(Sock, Canvas, HitTable) ->
     end.
 
 handle(Parent, Conn, Canvas, HitTable) ->
-    %test(Canvas),
     {ok, Packet} = gen_tcp:recv(Conn, 0),
     UserAgent = get_user_agent(Packet),
     io:fwrite(Packet, []),
@@ -56,11 +51,13 @@ handle(Parent, Conn, Canvas, HitTable) ->
 			Parent ! {hit, UserAgent};
 		    false -> io:fwrite("Patience, grasshopper. Your time will come again soon.\n")
 		end;
-      "GET"  -> gen_tcp:send(Conn,
+      "GET"  -> (case get_req_data(Packet) of
+		    "/" -> gen_tcp:send(Conn, response(file_to_string("../Client/index.html"),Packet));
+		    "_" -> gen_tcp:send(Conn,
 			     response(get_canvas_response(Canvas),
                                                           Packet))
-                end,
-    %gen_tcp:send(Conn, response("Hello World")),
+		 end)
+	end,
     gen_tcp:close(Conn).
 
 get_canvas_response(Canvas) -> array_to_csv(Canvas).
@@ -69,7 +66,6 @@ get_post_info(Data) ->
     Result = string:trim(string:find(Data, "\r\n\r\n")),
     SplitSecond = fun(X) -> string:to_integer(lists:nth(2, string:split(X, "="))) end,
     lists:map(SplitSecond, string:lexemes(Result, "&")).
-
 
 post_pixel_response(Canvas, Packet) ->
     [{Row, _}, {Col, _}, {Color, _}] = get_post_info(Packet),
@@ -80,18 +76,40 @@ get_user_agent(String) ->
     UserAgent = string:find(String, "User-Agent"),
     lists:nth(1, string:split(UserAgent, "\r\n")).
 
-extract_packet_field(Packet, Key) -> 
+extract_packet_field(Packet, Key) ->	
     Field = string:find(Packet, Key),
-    lists:nth(2, string:split(
-                   lists:nth(1, string:split(Field, "\r\n")), ": ")).
+    try lists:nth(2, string:split(
+                   lists:nth(1, string:split(Field, "\r\n")), ": ")) of
+	_ -> lists:nth(2, string:split(
+                   lists:nth(1, string:split(Field, "\r\n")), ": ")) 
+    catch
+	_:_ -> ""
+    end.
 
+	 
 get_req_type(String) ->
     lists:nth(1, string:split(lists:nth(1, string:split(String, "\r\n")), " ")).
 
+get_req_data(String) ->
+    Cdr = lists:nth(2, string:split(lists:nth(1, string:split(String, "\r\n")), " ")),
+    lists:nth(1, string:split(Cdr, " ")).
 
 generate_option_response(Str) ->
   iolist_to_binary(
     io_lib:fwrite("HTTP/1.0 200 OK\n\n", [])).
+
+file_to_string(String) ->
+	{ok, FileHandler} = file:open(String, [read]),
+	try get_lines(FileHandler)
+	after file:close(FileHandler)
+	end.
+
+get_lines(FileHandler) ->
+	case io:get_line(FileHandler, "") of
+		eof -> [];
+		Line -> Line ++ get_lines(FileHandler)
+	end.
+
 
 response(Str, Request) ->
     B = iolist_to_binary(Str),
