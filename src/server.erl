@@ -56,8 +56,10 @@ handle(Parent, Conn, Canvas, HitTable) ->
 						   Packet))
 		end;
       "GET"  -> (case get_req_data(Packet) of
+		    "/styles.css" -> gen_tcp:send(Conn, style_response(file_to_string("../Client/styles.css"),Packet));
+		    "/designs.js" -> gen_tcp:send(Conn, response(file_to_string("../Client/designs.js"),Packet));
 		    "/" -> gen_tcp:send(Conn, response(file_to_string("../Client/index.html"),Packet));
-		    "_" -> gen_tcp:send(Conn,
+		    "/canvas" -> gen_tcp:send(Conn,
 			     response(get_canvas_response(Canvas),
                                                           Packet))
 		 end)
@@ -113,6 +115,20 @@ get_lines(FileHandler) ->
 		eof -> [];
 		Line -> Line ++ get_lines(FileHandler)
 	end.
+
+
+style_response(Str, Request) ->
+    B = iolist_to_binary(Str),
+    iolist_to_binary(
+      io_lib:fwrite(
+         "HTTP/1.0 200 OK\n" ++
+         "Content-Type: text/css\n" ++
+	 "Access-Control-Allow-Origin: " ++
+	   extract_packet_field(Request, "Origin") ++ "\n" ++
+	 "Access-Control-Allow-Methods: GET, POST\n" ++
+	 "Access-Control-Allow-Headers: Content-Type, Content-Length\n" ++
+         "Content-Length: ~p\n\n~s",
+         [size(B), B])).
 
 
 response(Str, Request) ->
