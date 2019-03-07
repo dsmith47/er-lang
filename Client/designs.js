@@ -33,6 +33,7 @@ function curry(x,y,c) {
 // Therefore indexing will be inverted.
 //     Array[y-cor][x-cor]
 function makeGrid(height, width, cell_values){
+    console.log(cell_values);
     $("tr").remove();
     client_log("help",cell_values);
     for (var i = 0; i < height; i++) {
@@ -67,11 +68,14 @@ function get_grid(handler) {
     // Map csv string into 2d numeric array.
     // TODO: double-check this filter for correctness
     client_log("presplit",resp);
+    client_log(resp);
     state.grid = resp.split("\n").filter(function(v) { return v; })
 		                 .map(function(line) {
-                                   return line.split(",").filter(function(v) {return v.length})
-					                 .map(function (v) {if (v) {return v;} else {return 0;}});
-					                 
+                                   return line.split(",")
+					      .map(function(s) {
+					        return s.substring(1, s.length-1);
+					      })
+					      .filter(function (v) { return v; });
                                   });
     makeGrid(state.grid.length, state.grid[0].length, state.grid);
   });
