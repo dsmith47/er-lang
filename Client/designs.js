@@ -21,16 +21,13 @@ function makePost(row, col, color) {
 // Therefore indexing will be inverted.
 //     Array[y-cor][x-cor]
 function makeGrid(height, width, cell_values){
+    console.log(cell_values);
     $("tr").remove();
     for (var i = 0; i < height; i++) {
         $("#pixelCanvas").append("<tr id=row" + i + "></tr>");
         for (var y = 0; y < width; y++) {
             $("#row" + i).append("<td id=col"+y+"></td>");
-	    $("#row" + i + " #col" + y).css("background-color", cell_values[i][y])
-	    /*if (cell_values[i][y]!="#FFFFFF") {
-		client_log("PRINT", cell_values[i][y]);
-	    }*/
-            //client_log("help",cell_values);
+	    $("#row" + i + " #col" + y).css("background-color", cell_values[i][y]);
 	}
     }
 
@@ -61,13 +58,14 @@ function get_grid(handler) {
   $.get(hostname+GET_GRID_ENDPOINT, {}, function (resp) {
     // Map csv string into 2d numeric array.
     // TODO: double-check this filter for correctness
-    //client_log("halp",resp);
+    client_log(resp);
     state.grid = resp.split("\n").filter(function(v) { return v; })
 		                 .map(function(line) {
-                                   return line.split(",");
-                                                         //.map(parseInt)
-					                 //.map(function (v) {if (v) {return v;} else {return 0;}});
-					                 
+                                   return line.split(",")
+					      .map(function(s) {
+					        return s.substring(1, s.length-1);
+					      })
+					      .filter(function (v) { return v; });
                                   });
     makeGrid(state.grid.length, state.grid[0].length, state.grid);
   });
