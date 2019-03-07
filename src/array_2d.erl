@@ -18,8 +18,7 @@ set(Row, Col, Value, Array) ->
 array_to_csv(Array) -> 
     io:fwrite("~p\n", [Array]),
     array:foldl(fun (_, Arr, Acc) ->
-        string:concat(array:foldl(fun (_, T, A) -> 
-				      string:concat(lists:flatten(io_lib:format("~p,", [T])), A)
-				  end, "\n", Arr),
-                      Acc)
+        string:concat(Acc, array:foldl(fun (_, T, A) -> 
+				      string:concat(A, lists:flatten(io_lib:format("~p,", [T])))
+				  end, "\n", Arr))
         end, "", Array).
