@@ -16,32 +16,37 @@ function makePost(row, col, color) {
 	xhr.send(params);
 }
 
+function curry(x,y,c) {
+	let row = x;
+	let col = y; 
+	let color = c;
+	return function() {
+	    $("#row" + row + " #col" + y).css("background-color", color);
+	    client_log("row",row);
+	    client_log("col",col);
+	    makePost(row,col,color);
+    	};
+}
+
 // It's worth noting that the grid parsing and generation function
 // share the pattern of handling the grid as an Array of rows.
 // Therefore indexing will be inverted.
 //     Array[y-cor][x-cor]
 function makeGrid(height, width, cell_values){
     $("tr").remove();
+    client_log("help",cell_values);
     for (var i = 0; i < height; i++) {
         $("#pixelCanvas").append("<tr id=row" + i + "></tr>");
         for (var y = 0; y < width; y++) {
             $("#row" + i).append("<td id=col"+y+"></td>");
-	    $("#row" + i + " #col" + y).css("background-color", cell_values[i][y])
-	    /*if (cell_values[i][y]!="#FFFFFF") {
-		client_log("PRINT", cell_values[i][y]);
-	    }*/
-            //client_log("help",cell_values);
+	    if (cell_values[i][y].length >= 9) {
+		color = cell_values[i][y].substring(1,cell_values[i][y].length-1);
+	    }
+	    $("#row" + i + " #col" + y).css("background-color", color);
+	    
+	    $("#row" + i + " #col" + y).on("click", curry(i,y,$("#colorPicker").val()));
 	}
     }
-
-    $("#pixelCanvas").on("click", "td", function() {
-        $(this).css("background-color", $("#colorPicker").val());
-	//makePost(15,1,$("#colorPicker").val());
-	makePost(15,1,"#000000");
-	//client_log("help",$("#colorPicker").val());
-
-
-    });
 }
 
 // TODO: This should either not be hardcoded or be more configurable.
@@ -61,12 +66,11 @@ function get_grid(handler) {
   $.get(hostname+GET_GRID_ENDPOINT, {}, function (resp) {
     // Map csv string into 2d numeric array.
     // TODO: double-check this filter for correctness
-    //client_log("halp",resp);
+    client_log("presplit",resp);
     state.grid = resp.split("\n").filter(function(v) { return v; })
 		                 .map(function(line) {
-                                   return line.split(",");
-                                                         //.map(parseInt)
-					                 //.map(function (v) {if (v) {return v;} else {return 0;}});
+                                   return line.split(",").filter(function(v) {return v.length})
+					                 .map(function (v) {if (v) {return v;} else {return 0;}});
 					                 
                                   });
     makeGrid(state.grid.length, state.grid[0].length, state.grid);
@@ -80,5 +84,4 @@ function update_grid() {
 //makeGrid(40,40);
 // This code is implicitly an onload(), as the script doesn't load
 // until one of the body elements does.
-makePost(19,19,"#000000");
 this.grid = update_grid();
