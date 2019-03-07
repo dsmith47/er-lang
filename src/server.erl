@@ -4,6 +4,7 @@
 -export([start/0]).
 
 
+
 start() -> start(80, 20).
 
 flush_buffer(Canvas, HitTable) ->
@@ -17,7 +18,7 @@ flush_buffer(Canvas, HitTable) ->
     end.
 
 start(Port, Size) ->
-    Canvas = array_2d:new(Size, Size, 0),
+    Canvas = array_2d:new(Size, Size, "#FFFFFF"),
     HitTable = hits:new(),
     spawn(fun () -> {ok, Sock} = gen_tcp:listen(Port, [{active, false}]), 
 		    loop(Sock, Canvas, HitTable) end).
@@ -71,10 +72,12 @@ get_canvas_response(Canvas) -> array_to_csv(Canvas).
 get_post_info(Data) ->
     Result = string:trim(string:find(Data, "\r\n\r\n")),
     SplitSecond = fun(X) -> string:to_integer(lists:nth(2, string:split(X, "="))) end,
-    lists:map(SplitSecond, string:lexemes(Result, "&")).
+    lists:append(lists:map(SplitSecond, 
+		     lists:sublist(string:lexemes(Result, "&"), 2)),
+		     [lists:nth(2, string:split(lists:nth(3, string:lexemes(Result, "&")), "="))]).
 
 post_pixel_response(Canvas, Packet) ->
-    [{Row, _}, {Col, _}, {Color, _}] = get_post_info(Packet),
+    [{Row, _}, {Col, _}, Color] = get_post_info(Packet),
     Canvas2 = array_2d:set(Row, Col, Color, Canvas),
     {"ok", Canvas2}.
 
