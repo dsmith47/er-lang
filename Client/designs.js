@@ -40,10 +40,7 @@ function makeGrid(height, width, cell_values){
         $("#pixelCanvas").append("<tr id=row" + i + "></tr>");
         for (var y = 0; y < width; y++) {
             $("#row" + i).append("<td id=col"+y+"></td>");
-	    if (cell_values[i][y].length >= 9) {
-		color = cell_values[i][y].substring(1,cell_values[i][y].length-1);
-	    }
-	    $("#row" + i + " #col" + y).css("background-color", color);
+	    $("#row" + i + " #col" + y).css("background-color", cell_values[i][y]);
 	    
 	    $("#row" + i + " #col" + y).on("click", curry(i,y,$("#colorPicker").val()));
 	}
