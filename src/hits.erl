@@ -10,7 +10,7 @@ update(UserAgent,Dict) ->
 is_ready(UserAgent, Dict) ->
 	case dict:is_key(UserAgent, Dict) of
 		true ->
-			os:system_time() - dict:fetch(UserAgent, Dict) > 500000000;
+			os:system_time() - dict:fetch(UserAgent, Dict) > 5000000000;
 		false ->
 			true
 	end.

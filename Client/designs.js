@@ -4,15 +4,28 @@ function client_log(caller, msg) {
   console.log(caller + ": " + msg);
 }
 
-function makePost(row, col, color) {
+function makePost(row, col, color, msg) {
 	var url = "http://localhost:80/";
 	
 	var params = "row=" + row + "&col=" + col + "&color=" + color;
 	var xhr = new XMLHttpRequest();
-	xhr.open("POST",url,true);
+	xhr.open("POST",url,false);
 	
 	xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
+	xhr.onreadystatechange = function() {
+	  if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+	    // Request finished. Do processing here.
+            console.log(this.responseText);
+            console.log(this.responseText === 'updated');
+            if (this.responseText === 'updated') {
+	      msg.data = true;
+	    }
+            if (this.responseText !== 'updated') {
+	      msg.data = false;
+	    }
+	  }
+	}
 	xhr.send(params);
 }
 
@@ -21,9 +34,14 @@ function curry(x,y) {
 	let col = y; 
 	return function() {
 	    color = $("#colorPicker").val();
-	    $("#row" + row + " #col" + y).css("background-color", color);
-	    client_log("POST","{row: "+row+",col: "+col+",color:"+color+"}");
-	    makePost(row,col,color);
+	    messenger = {};
+	    messenger.data = false;
+	    makePost(row,col,color,messenger);
+	    console.log(messenger.data);
+	    if (messenger.data) {
+	      $("#row" + row + " #col" + y).css("background-color", color);
+	      client_log("POST","{row: "+row+",col: "+col+",color:"+color+"}");
+            }
     	};
 }
 
