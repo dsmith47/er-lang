@@ -5,7 +5,7 @@
 
 
 
-start() -> start(80, 20).
+start() -> start(80, 30).
 
 flush_buffer(Canvas, HitTable) ->
     receive
