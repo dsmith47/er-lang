@@ -16,14 +16,13 @@ function makePost(row, col, color) {
 	xhr.send(params);
 }
 
-function curry(x,y,c) {
+function curry(x,y) {
 	let row = x;
 	let col = y; 
-	let color = c;
 	return function() {
+	    color = $("#colorPicker").val();
 	    $("#row" + row + " #col" + y).css("background-color", color);
-	    client_log("row",row);
-	    client_log("col",col);
+	    client_log("POST","{row: "+row+",col: "+col+",color:"+color+"}");
 	    makePost(row,col,color);
     	};
 }
@@ -42,7 +41,7 @@ function makeGrid(height, width, cell_values){
             $("#row" + i).append("<td id=col"+y+"></td>");
 	    $("#row" + i + " #col" + y).css("background-color", cell_values[i][y]);
 	    
-	    $("#row" + i + " #col" + y).on("click", curry(i,y,$("#colorPicker").val()));
+	    $("#row" + i + " #col" + y).on("click", curry(i,y));
 	}
     }
 }
